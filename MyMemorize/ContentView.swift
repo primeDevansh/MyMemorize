@@ -56,6 +56,12 @@ struct ContentView: View {
             ForEach(0..<theme.count, id: \.self) { index in
                 themeAdjust(to: index, symbol: themeSymbol[index])
             }
+            Button(action: {
+                CardCount = 3
+                CurrentTheme = 0
+            }, label: {
+                Image(systemName: "clock.arrow.2.circlepath")
+            })
         }
     }
 
@@ -73,7 +79,7 @@ struct ContentView: View {
         }, label: {
             Image(systemName: symbol)
         })
-        .opacity((CurrentTheme == to) ? 1 : 0.3)
+        .opacity((CurrentTheme == to) ? 1 : 0.5)
     }
 
     func cardCountAdjust(by offset: Int, symbol: String) -> some View {
