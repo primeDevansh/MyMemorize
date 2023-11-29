@@ -17,11 +17,15 @@ struct ContentView: View {
     let themeSymbol = ["car.circle.fill",
                        "heart.circle.fill",
                        "camera.circle.fill"]
+    let themeDescription = ["Vehicles",
+                            "Animals",
+                            "Electronics"]
     
     var body: some View {
         VStack {
             Text("Memorize!")
                 .font(.largeTitle)
+            resetButton
             cards
             Spacer()
             cardCountAdjusters
@@ -47,21 +51,13 @@ struct ContentView: View {
             Spacer()
             cardRemover
         }
-        .imageScale(.large)
-        .font(.largeTitle)
     }
     
     var themeButtons: some View {
         HStack {
             ForEach(0..<theme.count, id: \.self) { index in
-                themeAdjust(to: index, symbol: themeSymbol[index])
+                themeAdjust(to: index, describe: themeDescription[index] , symbol: themeSymbol[index])
             }
-            Button(action: {
-                CardCount = 3
-                CurrentTheme = 0
-            }, label: {
-                Image(systemName: "clock.arrow.2.circlepath")
-            })
         }
     }
 
@@ -73,11 +69,27 @@ struct ContentView: View {
         cardCountAdjust(by: +1, symbol: "rectangle.stack.fill.badge.plus")
     }
     
-    func themeAdjust(to: Int, symbol: String) -> some View {
+    var resetButton: some View {
+        return Button(action: {
+            CardCount = 3
+            CurrentTheme = 0
+        }, label: {
+            VStack {
+                Text("Reset")
+            }
+        }).disabled((CardCount == 3) && (CurrentTheme == 0))
+    }
+    
+    func themeAdjust(to: Int, describe: String, symbol: String) -> some View {
         Button(action: {
             CurrentTheme = to
         }, label: {
-            Image(systemName: symbol)
+            VStack {
+                Image(systemName: symbol)
+                    .imageScale(.large)
+                    .font(.largeTitle)
+                Text(describe)
+            }
         })
         .opacity((CurrentTheme == to) ? 1 : 0.5)
     }
@@ -87,6 +99,7 @@ struct ContentView: View {
             CardCount += offset
         }, label: {
             Image(systemName: symbol)
+                .imageScale(.large)
         })
         .disabled(CardCount + offset < 1 || CardCount + offset > theme[CurrentTheme].count)
     }
