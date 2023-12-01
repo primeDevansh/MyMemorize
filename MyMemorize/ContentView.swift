@@ -8,18 +8,24 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State var CardCount: Int = 3
+    let minPairs: Int = 4
+    let defTheme: Int = 0               //default theme
+    @State var currentPairs: Int = 4
+    @State var CardCount: Int = 8       //current card count
     @State var CurrentTheme: Int = 0
+    
+    //deletable in future
+    @State var minCardCount: Int = 8
     
     let theme = [["✈️", "🚗", "🚀", "🚙", "🚎", "🚛", "🏎", "🛫", "🚕", "🚐", "⛴", "🚝", "🚟"],
                  ["🐱", "🐈", "🐈‍⬛", "🐶", "🐕‍🦺", "🐰", "🐇", "🐭", "🐹", "🐀", "🦔", "🐮", "🐷"],
                  ["📷", "📱", "💻", "⌨️", "🖥", "🖨", "🖱", "🖲", "🕹", "💽", "💾", "💿", "🎙"]]
-    let themeSymbol = ["car.circle.fill",
-                       "heart.circle.fill",
-                       "camera.circle.fill"]
+    let themeSymbol: Array<String> = ["car.circle",
+                                      "leaf.circle",
+                                      "camera.circle"]
     let themeDescription = ["Vehicles",
                             "Animals",
-                            "Electronics"]
+                            "eDevices"]
     
     var body: some View {
         VStack {
@@ -34,10 +40,15 @@ struct ContentView: View {
     }
     
     var cards: some View {
-        ScrollView {
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 100, maximum: 120))]) {
-                ForEach(0..<CardCount, id: \.self) { index in
-                    CardView(content: theme[CurrentTheme][index])
+        let shuffledTheme = theme[CurrentTheme].shuffled()
+        let shuffledThemeUpto = shuffledTheme.prefix(currentPairs)
+        let bufferShuffledTheme = shuffledThemeUpto + shuffledThemeUpto
+        let finalShuffledTheme = bufferShuffledTheme.shuffled()
+        
+        return ScrollView {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 80, maximum: 100))]) {
+                ForEach(0..<(currentPairs*2), id: \.self) { index in
+                    CardView(content: finalShuffledTheme[index])
                 }
             }
         }
@@ -71,42 +82,46 @@ struct ContentView: View {
     
     var resetButton: some View {
         return Button(action: {
-            CardCount = 3
-            CurrentTheme = 0
+//            CardCount = minCardCount
+            currentPairs = minPairs
+            CurrentTheme = defTheme
         }, label: {
             VStack {
                 Text("Reset")
             }
-        }).disabled((CardCount == 3) && (CurrentTheme == 0))
+        }).disabled((currentPairs == minPairs) && (CurrentTheme == defTheme))
     }
     
-    func themeAdjust(to: Int, describe: String, symbol: String) -> some View {
-        Button(action: {
-            CurrentTheme = to
+    func themeAdjust(to theme: Int, describe: String, symbol: String) -> some View {
+        return Button(action: {
+            CurrentTheme = theme
+            currentPairs = Int.random(in: minPairs...13)
         }, label: {
             VStack {
                 Image(systemName: symbol)
                     .imageScale(.large)
                     .font(.largeTitle)
                 Text(describe)
+                    .font(.footnote)
             }
         })
-        .opacity((CurrentTheme == to) ? 1 : 0.5)
+        .opacity((CurrentTheme == theme) ? 1 : 0.5)
     }
 
     func cardCountAdjust(by offset: Int, symbol: String) -> some View {
         Button (action: {
-            CardCount += offset
+//            CardCount += offset
+            currentPairs += offset
         }, label: {
             Image(systemName: symbol)
                 .imageScale(.large)
         })
-        .disabled(CardCount + offset < 1 || CardCount + offset > theme[CurrentTheme].count)
+        .disabled(currentPairs + offset < 1 || currentPairs + offset > theme[CurrentTheme].count)
     }
 }
 
 struct CardView: View {
-    @State var isFaceUp = true
+    @State var isFaceUp = false
     let content: String
     
     var body: some View {
